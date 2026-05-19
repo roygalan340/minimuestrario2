@@ -16,6 +16,7 @@
             --rojo: #e61c24;
             --azul: #004b93;
             --verde-wa: #25d366;
+            --gris-boton: #f1f3f6;
             --oscuro: #0f1a24;
         }
 
@@ -98,13 +99,13 @@
         .c-rojo { color: var(--rojo); }
         .c-azul { color: var(--azul); }
 
-        /* --- SISTEMA DE POP-UP (MODAL) --- */
+        /* --- POP-UP MODAL MEJORADO Y MÁS GRANDE --- */
         #modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(5px);
-            display: none; /* Oculto por defecto */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -112,50 +113,84 @@
 
         .modal {
             background: white;
-            width: 90%;
-            max-width: 360px;
-            border-radius: 30px;
-            padding: 25px;
+            width: 92%;
+            max-width: 380px;
+            border-radius: 32px;
+            padding: 30px 24px; /* Más espacio interno */
             text-align: center;
             position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             animation: aparecer 0.3s ease-out;
+            box-sizing: border-box;
         }
 
         @keyframes aparecer { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .close-btn {
             position: absolute;
-            top: -15px; right: -15px;
+            top: -12px; right: -12px;
             background: var(--rojo);
             color: white;
-            width: 35px; height: 35px;
+            width: 36px; height: 36px;
             border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             font-weight: bold; cursor: pointer;
             border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .modal h2 { margin: 0; font-size: 20px; color: var(--azul); }
-        .modal p { font-size: 14px; margin: 10px 0; color: #555; }
+        .modal h2 { margin: 0 0 5px 0; font-size: 22px; color: var(--azul); font-weight: 800; }
+        .modal p { font-size: 14px; margin: 8px 0; color: #444; line-height: 1.4; }
+        
+        /* Contenedor del QR sin compresión */
+        .qr-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+        }
 
-        .qr-img { width: 220px; height: 220px; margin: 15px 0; border: 2px solid #eee; padding: 5px; }
+        .qr-img { 
+            width: 230px; 
+            height: 230px; 
+            object-fit: contain; /* Evita que se deforme o estire */
+            border: 1px solid #e2e8f0; 
+            padding: 8px; 
+            border-radius: 16px;
+            background: #ffffff;
+        }
 
-        .wa-btn {
-            background: var(--verde-wa);
-            color: white;
+        /* BOTONES DEL MODAL */
+        .btn-accion {
             text-decoration: none;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
-            padding: 15px;
-            border-radius: 15px;
+            padding: 14px;
+            border-radius: 16px;
             font-weight: bold;
-            font-size: 16px;
-            margin-top: 15px;
+            font-size: 15px;
+            margin-top: 12px;
+            transition: background 0.2s;
         }
 
-        .wa-btn i { font-size: 20px; }
+        .btn-descargar {
+            background: var(--gris-boton);
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-descargar:active { background: #e2e8f0; }
+
+        .wa-btn {
+            background: var(--verde-wa);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+
+        .wa-btn:active { background: #1ebd56; }
 
     </style>
 </head>
@@ -203,31 +238,34 @@
         <div class="modal">
             <div class="close-btn" onclick="cerrarPago()">X</div>
             <h2 id="modal-titulo">Pagar Pedido</h2>
-            <p>Escanea el QR para pagar <b><span id="modal-precio">0</span> Bs.</b> y luego presiona el botón verde.</p>
+            <p>Monto a transferir: <b><span id="modal-precio">0</span> Bs.</b></p>
+            <p style="color: #64748b; font-size: 13px;">📸 <b>Saca una captura de pantalla</b> al QR o descárgalo para pagar desde tu App bancaria.</p>
             
-            <img src="qr.png" class="qr-img" alt="QR de Pago Roy García">
+            <div class="qr-container">
+                <img src="qr.png" class="qr-img" alt="QR Roy García">
+            </div>
 
-            <a id="btn-whatsapp" href="#" class="wa-btn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="20">
-                YA PAGUÉ, ENVIAR RECIBO
+            <a href="qr.png" download="QR_Roy_Garcia.png" class="btn-accion btn-descargar">
+                💾 GUARDAR QR EN CELULAR
+            </a>
+
+            <a id="btn-whatsapp" href="#" class="btn-accion wa-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="18">
+                YA SAQUÉ CAPTURA Y PAGUÉ
             </a>
         </div>
     </div>
 
     <script>
         function abrirPago(nombre, precio) {
-            // Actualizamos los textos del Pop-up
             document.getElementById('modal-titulo').innerText = nombre;
             document.getElementById('modal-precio').innerText = precio;
             
-            // Creamos el link de WhatsApp con el mensaje automático
             const telefono = "59169240891";
-            const mensaje = encodeURIComponent(`Hola Roy García, acabo de pagar ${precio} Bs. por el ${nombre}. Aquí te envío el comprobante.`);
+            const mensaje = encodeURIComponent(`Hola Roy García, ya saqué captura y pagué los ${precio} Bs. por el ${nombre}. Aquí te adjunto el comprobante.`);
             const urlWa = `https://wa.me/${telefono}?text=${mensaje}`;
             
             document.getElementById('btn-whatsapp').href = urlWa;
-
-            // Mostramos el Pop-up
             document.getElementById('modal-overlay').style.display = 'flex';
         }
 
@@ -235,7 +273,6 @@
             document.getElementById('modal-overlay').style.display = 'none';
         }
 
-        // Cerrar si tocan fuera del cuadro blanco
         window.onclick = function(event) {
             const overlay = document.getElementById('modal-overlay');
             if (event.target == overlay) {
